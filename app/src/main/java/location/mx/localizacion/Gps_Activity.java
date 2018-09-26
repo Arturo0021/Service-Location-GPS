@@ -1,6 +1,8 @@
 package location.mx.localizacion;
 
 import android.Manifest;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -11,13 +13,14 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 public class Gps_Activity extends Service {
 
     private static final String TAG = "#TAG - ";
-    private LocationManager mLocationManager = null;
+    private LocationManager mLocationManager;
     private static final int LOCATION_INTERVAL = 1000;
     private static final float LOCATION_DISTANCE = 10f;
 
@@ -33,6 +36,7 @@ public class Gps_Activity extends Service {
        public void onLocationChanged(Location location) {
            mLastLocation.set(location);
            actualizaMejorLocalizador(location);
+           notification_Location(location);
        }
 
        @Override
@@ -131,8 +135,23 @@ public class Gps_Activity extends Service {
 
     private static Location actualizaMejorLocalizador(Location localiz) {
         Log.i(TAG, "Latitud: " + localiz.getLatitude() + " Longitud: " + localiz.getLongitude());
-
         return localiz;
+    }
+
+    private void notification_Location(Location location){
+
+        PendingIntent pi = PendingIntent.getActivity(this, 0, new Intent(this, Main_Activity.class), 0);
+
+        NotificationCompat.Builder mnotification = new NotificationCompat.Builder(this);
+        mnotification.setSmallIcon(R.drawable.ic_launcher_foreground);
+        mnotification.setContentTitle("Ubicación Encontrada");
+        mnotification.setContentText("Latitud: " + location.getLatitude() + " Longitud: " + location.getLongitude());
+        mnotification.setContentIntent(pi);
+        mnotification.setAutoCancel(true);
+
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0, mnotification.build());
+
     }
 
 }
